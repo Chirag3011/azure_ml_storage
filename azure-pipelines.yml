@@ -1,5 +1,5 @@
 trigger:
-- none
+- main
 
 pool: shagent
 
@@ -28,7 +28,7 @@ stages:
               latest_blob=$(az storage blob list \
                 --container-name $AZURE_STORAGE_CONTAINER \
                 --account-name $AZURE_STORAGE_ACCOUNT \
-                --query '[].{name:name, lastModified:properties.lastModified}' --account-key  $(AZURE_STORAGE_CONNECTION_STRING)\
+                --query '[].{name:name, lastModified:properties.lastModified}' --connection-string "$(AZURE_STORAGE_CONNECTION_STRING)"\
                 --output tsv | sort -r -k2 | head -n1 | cut -f1)
               
               if [ -z "$latest_blob" ]; then
