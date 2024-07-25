@@ -44,7 +44,7 @@ stages:
               echo "Downloading the latest blob..."
               az storage blob download \
                 --container-name $AZURE_STORAGE_CONTAINER \
-                --account-name $AZURE_STORAGE_ACCOUNT \
+                --account-name $AZURE_STORAGE_ACCOUNT --connection-string "$(AZURE_STORAGE_CONNECTION_STRING)\
                 --name "$latest_blob" \
                 --file "$DOWNLOAD_DIR/$FILE_NAME"
               
