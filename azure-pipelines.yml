@@ -4,16 +4,13 @@ trigger:
 pool: shagent
 
 variables:
-  AZURE_STORAGE_ACCOUNT: 'sachirag'
-  AZURE_STORAGE_CONTAINER: 'azure-test-space'
   DOWNLOAD_DIR: '$(Build.ArtifactStagingDirectory)/devopsdir'
-  FILE_NAME: 'new_doc.txt.txt'
 
 stages:
   - stage: List_Publish_Blob_Files
     displayName: List Publish Blob Container file
     jobs:
-      - job: download
+      - job: List_Publish_Blob_Files
         steps:
         - task: AzureCLI@2
           displayName: Downloading and List Blob files
@@ -26,7 +23,7 @@ stages:
               
               echo "Listing blobs and finding the latest one..."
               latest_blob=$(az storage blob list \
-                --container-name $AZURE_STORAGE_CONTAINER \
+                --container-name $(AZURE_STORAGE_CONTAINER_INPUT) \
                 --account-name $AZURE_STORAGE_ACCOUNT \
                 --query '[].{name:name, lastModified:properties.lastModified}' --connection-string "$(AZURE_STORAGE_CONNECTION_STRING)"\
                 --output tsv | sort -r -k2 | head -n1 | cut -f1)
@@ -35,18 +32,20 @@ stages:
                 echo "No blobs found in the container with the specified prefix."
                 exit 1
               fi
-              
+
+              echo " "
               echo "Latest blob: $latest_blob"
-              
+              echo " "
+
               echo "Creating download directory..."
               mkdir -p $DOWNLOAD_DIR
               
               echo "Downloading the latest blob..."
               az storage blob download \
-                --container-name $AZURE_STORAGE_CONTAINER \
+                --container-name $(AZURE_STORAGE_CONTAINER_INPUT) \
                 --account-name $AZURE_STORAGE_ACCOUNT --connection-string "$(AZURE_STORAGE_CONNECTION_STRING)"\
                 --name "$latest_blob" \
-                --file "$DOWNLOAD_DIR/$FILE_NAME"
+                --file "$DOWNLOAD_DIR/$latest_blob"
               
               echo "Setting pipeline variable for the downloaded file name..."
               echo "##vso[task.setvariable variable=downloadfilename]$FILE_NAME"
